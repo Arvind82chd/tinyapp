@@ -7,12 +7,14 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs") 
 
 function generateRandomString() { //function to generate random string of 6 alphanumeric values.
-  let randomString = []; //declare a randomString to capture the values.
+  let randomString = '1234567890abcdefghijklmnopqrstuvwxyz'; 
+  let shortString = '';
   for (let i = 0; i < 6; i++) { //setting counter to 6 random vaules 
-    let rString = Math.random().toString(36);//method to generate one alphanumeric value
-    randomString.push(rString[i]);//push the value to randomString array.
+   // let rString = Math.random().toString(36);//method to generate one alphanumeric value
+   // randomString.push(rString[i]);//push the value to randomString array.
+   shortString += randomString.charAt(Math.floor(Math.random() * randomString.length))
   }
-  return String(randomString);//retun the string of array randomString.
+  return shortString;//retun the string of array randomString.
 }
 
 const urlDatabase = {
@@ -42,18 +44,23 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL };
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL];
+  const templateVars = { shortURL: shortURL, longURL: longURL };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  // const longURL = ...
+  const longURL = urlDatabase[req.params.shortURL]
   res.redirect(longURL);
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  const shortURL = generateRandomString();
+  urlDatabase[shortURL] = req.body.longURL;
+  //console.log(urlDatabase);  // Log the POST request body to the console
+  //res.send(urlDatabase); 
+  res.redirect(`/urls/${shortURL}`)        // Respond with 'Ok' (we will replace this)
 });
 
 app.listen(PORT, () => {
