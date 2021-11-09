@@ -6,13 +6,13 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs") 
 
-function generateRandomString() {
-  let randomString = [];
-  for (let i = 0; i < 6; i++) {
-    let rString = Math.random(String(64));
-    randomString.push(rString[i]);
+function generateRandomString() { //function to generate random string of 6 alphanumeric values.
+  let randomString = []; //declare a randomString to capture the values.
+  for (let i = 0; i < 6; i++) { //setting counter to 6 random vaules 
+    let rString = Math.random().toString(36);//method to generate one alphanumeric value
+    randomString.push(rString[i]);//push the value to randomString array.
   }
-  return String(randomString);
+  return String(randomString);//retun the string of array randomString.
 }
 
 const urlDatabase = {
@@ -44,6 +44,11 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL };
   res.render("urls_show", templateVars);
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  // const longURL = ...
+  res.redirect(longURL);
 });
 
 app.post("/urls", (req, res) => {
