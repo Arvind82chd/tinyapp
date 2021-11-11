@@ -8,7 +8,9 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
   <title>TinyApp</title>
 </head>
+
 <body>
+    <%- include('partials/_header') %>
   <main style="margin: 1em;">
     <h3>Register</h3>
     <table class="table">
@@ -16,13 +18,13 @@
         <tr>
           <th scope="col">Email</th>
           <td><form method="POST" action="/register"><input type = "email" name ="email" ></input>
-          </form></td>
+          </td>
         </tr>
       </thead>
       <tbody>
           <tr>
             <th scope="col">Password</th>
-            <td><form method="POST" action="/register"><input type = "password" name ="password" ><button type ="submit">Register</button></input>
+            <td><input type = "password" name ="password" ><button type ="submit">Register</button></input>
             </form>
             </td>
           </tr>

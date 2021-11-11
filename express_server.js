@@ -1,28 +1,41 @@
 const express = require("express");
 const app = express();
-const PORT = 3000; // default port 8080
+const PORT = 3000; // default port 3000
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const morgan = require('morgan');
 
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs") 
+app.set(morgan('dev'));
 
-function generateRandomString() { //function to generate random string of 6 alphanumeric values.
-  let randomString = '1234567890abcdefghijklmnopqrstuvwxyz'; 
+function generateRandomString() { 
+  let randomString = '1234567890abcdefghijklmnopqrstuvwxyz'; //learn't a new way from a mentor.
   let shortString = '';
-  for (let i = 0; i < 6; i++) { //setting counter to 6 random vaules 
-   // let rString = Math.random().toString(36);//method to generate one alphanumeric value
-   // randomString.push(rString[i]);//push the value to randomString array.
+  for (let i = 0; i < 6; i++) { 
    shortString += randomString.charAt(Math.floor(Math.random() * randomString.length))
   }
-  return shortString;//retun the string of array randomString.
+  return shortString;
 }
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -37,13 +50,15 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  const user = users[req.cookies["user_id"]]
+  const templateVars = { urls: urlDatabase,
+  user};
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    username: req.cookies["user_id"],
     // ... any other vars
   };
   res.render("urls_new", templateVars);
@@ -62,15 +77,15 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  res.render("register");
+  const templateVars = {user:{}};
+  res.render("register", templateVars);
 });
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
-  //console.log(urlDatabase);  // Log the POST request body to the console
   //res.send(urlDatabase); 
-  res.redirect(`/urls/${shortURL}`)        // Respond with 'Ok' (we will replace this)
+  res.redirect(`/urls/${shortURL}`)        
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
@@ -84,18 +99,26 @@ app.post("/urls/:shortURL/sub", (req, res) => {
 }); 
 
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
+  res.cookie('user_id', req.body.username);
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('username')
+  res.clearCookie('user_id')
   res.redirect("/urls");
 });
-
-// app.post("/register", (req, res) => {
-//   res.
-// })
+//Take email & password from /register page and save them to users object.
+app.post("/register", (req, res) => {
+  const userId = generateRandomString();
+  users[userId] = {
+    id: userId,
+    email: req.body.email,
+    password: req.body.password 
+  }
+  console.log(users);
+  res.cookie('user_id', userId);
+  res.redirect("/urls")
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
