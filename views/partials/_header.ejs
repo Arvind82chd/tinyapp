@@ -5,23 +5,27 @@
         <span class="navbar-toggler-icon"></span>
        </button>
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-        <div class="navbar-nav ml-auto"  >
-          <a class="nav-item nav-link" href="/urls">My URLs</a>
-          <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        </div>
-        
-        <% if (user) { %>
-          <form class="form-inline my-2 my-lg-0" method="POST" action="/logout"> 
-            <span><%= user.email %></span>
-            <button class="btn btn-secondary my-2 my-sm-0" type ="submit">Logout</button>
-          </form>
-       <% }else{ %>
-        <form class="form-inline my-2 my-lg-0" method="POST" action="/login">
-          <input class="form-control mr-sm-2" type = "text" name ="user_id"/>
-          <button class="btn btn-primary my-2 my-sm-0" type ="submit">SUBMIT</button>
-         </form>
-      <% } %>
+        <div class="navbar-nav"  >
+          <a class="nav-item nav-link" style="color: aliceblue;" href="/urls">My URLs</a>
+          <a class="nav-item nav-link" style="color: aliceblue;" href="/urls/new">Create New URL</a>
   
-      </div>
+          <body>
+            <div>
+              <% if (user) { %>
+                <form class="form-inline my-2 my-lg-0" method="POST" action="/logout"> 
+                  <span><%= user.email %></span>
+                  <button class="btn btn-secondary my-2 my-sm-0" type ="submit">Logout</button>
+                </form>
+              <% }else{ %>
+              <!-- <form class="form-inline my-2 my-lg-0" method="POST" action="/login">
+                <input class="form-control mr-sm-2" type = "text" name ="user_id"/>
+                <button class="btn btn-primary my-2 my-sm-0" type ="submit">SUBMIT</button>
+               </form> -->
+               <a href="/login">Login</a>
+               <a href="/register">Register</a>
+              <% } %>
+              </div>
+          </body>
     </nav>
   </header>
+  

@@ -61,7 +61,6 @@ app.get("/hello", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const user = users[req.cookies["user_id"]]
-
   // const user = req.cookies["user_id"];
   const templateVars = { urls: urlDatabase,
   user};
@@ -71,8 +70,7 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const user = users[req.cookies["user_id"]]
   const templateVars = {
-    // user_id: req.cookies["user_id"],
-    // ... any other vars
+    user_id: req.cookies["user_id"],
     user
   };
   res.render("urls_new", templateVars);
@@ -96,6 +94,11 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
+app.get("/login", (req, res) => {
+  const templateVars = {user:null};
+  res.render("login", templateVars);
+})
+
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
@@ -114,19 +117,29 @@ app.post("/urls/:shortURL/sub", (req, res) => {
 }); 
 
 app.post("/login", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = emailLookup(email);
+  console.log('test1', user);
+  if (user) {
+    if (user.password === password) {
+    console.log('test2', user.id);
+    res.cookie('user_id', user.id);
+    res.redirect("/urls");
+    } else {
+      return res.status(403).send("Wrong Email or Password");
+    }
+  } else {
+    return res.status(403).send("Email not found.");
+  }
   // res.cookie('user_id', req.cookies.user_id);
-   res.cookie('user_id', req.body.user_id);
-  // const username = req.body.username;
-  // res.cookie('username', username);
-  console.log('test', req.body.user_id);
-  res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id')
   res.redirect("/urls");
 });
-//Take email & password from /register page and save them to users object.
+
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -139,7 +152,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Email already in use.");
   }
   const userId = generateRandomString();
-  users[userId] = { // refactored
+  users[userId] = { // refactored with mentors
     id: userId,
     email: email,
     password: password 
