@@ -37,6 +37,16 @@ const users = {
   }
 }
 
+function emailLookup(email) {
+  for (let userId in users) {
+    console.log(users[userId]);
+    if (email === users[userId].email){
+      return users[userId];
+    }
+  }
+  return false;
+}
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -51,23 +61,28 @@ app.get("/hello", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const user = users[req.cookies["user_id"]]
+
+  // const user = req.cookies["user_id"];
   const templateVars = { urls: urlDatabase,
   user};
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
+  const user = users[req.cookies["user_id"]]
   const templateVars = {
-    username: req.cookies["user_id"],
+    // user_id: req.cookies["user_id"],
     // ... any other vars
+    user
   };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  const user = users[req.cookies["user_id"]]
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL];
-  const templateVars = { shortURL: shortURL, longURL: longURL, username: req.cookies["username"] };
+  const templateVars = { shortURL: shortURL, longURL: longURL, user};
   res.render("urls_show", templateVars);
 });
 
@@ -77,7 +92,7 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = {user:{}};
+  const templateVars = {user:null}; 
   res.render("register", templateVars);
 });
 
@@ -99,7 +114,11 @@ app.post("/urls/:shortURL/sub", (req, res) => {
 }); 
 
 app.post("/login", (req, res) => {
-  res.cookie('user_id', req.body.username);
+  // res.cookie('user_id', req.cookies.user_id);
+   res.cookie('user_id', req.body.user_id);
+  // const username = req.body.username;
+  // res.cookie('username', username);
+  console.log('test', req.body.user_id);
   res.redirect("/urls");
 });
 
@@ -109,11 +128,21 @@ app.post("/logout", (req, res) => {
 });
 //Take email & password from /register page and save them to users object.
 app.post("/register", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  if (!email || !password) {
+    return res.status(400).send("Email or Password not valid.");   
+  }
+  
+  const validEmail = emailLookup(email);
+  if (validEmail) {
+    return res.status(400).send("Email already in use.");
+  }
   const userId = generateRandomString();
-  users[userId] = {
+  users[userId] = { // refactored
     id: userId,
-    email: req.body.email,
-    password: req.body.password 
+    email: email,
+    password: password 
   }
   console.log(users);
   res.cookie('user_id', userId);
@@ -123,3 +152,5 @@ app.post("/register", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+

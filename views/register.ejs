@@ -11,25 +11,22 @@
 
 <body>
     <%- include('partials/_header') %>
+    
+   
   <main style="margin: 1em;">
     <h3>Register</h3>
-    <table class="table">
-      <thead>
-        <tr>
-          <th scope="col">Email</th>
-          <td><form method="POST" action="/register"><input type = "email" name ="email" ></input>
-          </td>
-        </tr>
-      </thead>
-      <tbody>
-          <tr>
-            <th scope="col">Password</th>
-            <td><input type = "password" name ="password" ><button type ="submit">Register</button></input>
-            </form>
-            </td>
-          </tr>
-      </tbody>
-    </table>
+    <form method="POST" action="/register">
+        <div class="form-group">
+          <label for="exampleInputEmail1">Email address</label>
+          <input type="email" name = "email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+          <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+        </div>
+        <div class="form-group">
+          <label for="exampleInputPassword1">Password</label>
+          <input type="password" name = "password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
   </main>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
