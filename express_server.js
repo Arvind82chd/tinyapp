@@ -4,6 +4,7 @@ const PORT = 3000; // default port 3000
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const morgan = require('morgan');
+const bcrypt = require('bcryptjs');
 
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
@@ -186,10 +187,11 @@ function checkPermission(req) {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10); 
   const user = emailLookup(email);
   console.log('test1', user);
   if (user) {
-    if (user.password === password) {
+    if (bcrypt.compareSync(password, hashedPassword)) {
     console.log('test2', user.id);
     res.cookie('user_id', user.id);
     res.redirect("/urls");
@@ -203,13 +205,14 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id')
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 app.post("/register", (req, res) => {
   const email = req.body.email;
-  const password = req.body.password;
-  if (!email || !password) {
+  const password = req.body.password; 
+  const hashedPassword = bcrypt.hashSync(password, 10);
+  if (!email || !hashedPassword) {
     return res.status(400).send("Email or Password not valid.");   
   }
   
@@ -221,7 +224,7 @@ app.post("/register", (req, res) => {
   users[userId] = { // refactored with mentors
     id: userId,
     email: email,
-    password: password 
+    password: hashedPassword 
   }
   console.log(users);
   res.cookie('user_id', userId);
