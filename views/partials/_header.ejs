@@ -9,8 +9,7 @@
           <a class="nav-item nav-link" style="color: aliceblue;" href="/urls">My URLs</a>
           <a class="nav-item nav-link" style="color: aliceblue;" href="/urls/new">Create New URL</a>
   
-          <body>
-            <div>
+            <div class="navbar-nav"  >
               <% if (user) { %>
                 <form class="form-inline my-2 my-lg-0" method="POST" action="/logout"> 
                   <span><%= user.email %></span>
@@ -21,11 +20,10 @@
                 <input class="form-control mr-sm-2" type = "text" name ="user_id"/>
                 <button class="btn btn-primary my-2 my-sm-0" type ="submit">SUBMIT</button>
                </form> -->
-               <a href="/login">Login</a>
-               <a href="/register">Register</a>
+               <a href="/login" style="color: aliceblue;">Login</a>
+               <a href="/register" style="color: aliceblue;">Register</a>
               <% } %>
               </div>
-          </body>
     </nav>
   </header>
-  
+  <!--  -->
