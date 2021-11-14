@@ -6,7 +6,11 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 This project has a register and login page to access its contents and services. Each user can generate, edit and delete short URLs against each long url provided by them. The users can access other users short urls if they know them but can not delete or edit them.
 
-!["screenshot description"](#)
+!["Register User Page"](https://github.com/Arvind82chd/tinyapp/blob/master/Docs/Register-user.png)
+!["User Login Page"](https://github.com/Arvind82chd/tinyapp/blob/master/Docs/User-Login.png)
+!["Creating New URL Page"](https://github.com/Arvind82chd/tinyapp/blob/master/Docs/New-urls.png)
+!["Editing existing URL Page"](https://github.com/Arvind82chd/tinyapp/blob/master/Docs/Edit-urls.png)
+!["URLs Page"](https://github.com/Arvind82chd/tinyapp/blob/master/Docs/URLs.png)
 
 ## Dependencies
 
