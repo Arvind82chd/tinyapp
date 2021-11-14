@@ -25,3 +25,5 @@ This project has a register and login page to access its contents and services. 
 
 - Install all dependencies (using the `npm install` command).
 - Run the development web server using the `node express_server.js` command.
+
+Project made with guidance and support of mentors and peers. 
