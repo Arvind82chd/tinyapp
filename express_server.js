@@ -84,7 +84,7 @@ function generateRandomString() {
 
 //function to check for permissions - helped by a mentor
 function checkPermission(req) {
-  let userId = req.cookies["user_id"];
+  let userId = req.session.user_id;
   let urlId = req.params.shortURL;
   if (!urlDatabase[urlId]) {
     return {data: null, error: 'URL does not exist.' }
@@ -96,7 +96,7 @@ function checkPermission(req) {
 
 //ALL GETs:
 app.get("/urls", (req, res) => {
-  const idKey = req.cookies["user_id"];
+  const idKey = req.session.user_id;
   const user = users[idKey];
   const result = urlsForUser(idKey, urlDatabase);
   const templateVars = { urls: result,
@@ -113,9 +113,9 @@ app.get("/urls", (req, res) => {
 
 
 app.get("/urls/new", (req, res) => {
-  const user = users[req.cookies["user_id"]]
+  const user = users[req.session.user_id]
   const templateVars = {
-    user_id: req.cookies["user_id"],
+    user_id: req.session.user_id,
     user
   };
   if (!user) {
@@ -132,7 +132,7 @@ app.get("/urls/new", (req, res) => {
 
 //equivalent to urls/:id on compass
 app.get("/urls/:shortURL", (req, res) => {
-  const idKey = req.cookies["user_id"];
+  const idKey = req.session.user_id;
   const user = users[idKey]
   const shortURL = req.params.shortURL;
   const result = urlsForUser(idKey, urlDatabase);
@@ -163,7 +163,7 @@ app.get("/login", (req, res) => {
 //ALL POSTS
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = {longURL: req.body.longURL, userID: req.cookies["user_id"]};
+  urlDatabase[shortURL] = {longURL: req.body.longURL, userID: req.session.user_id};
   res.redirect(`/urls/${shortURL}`)        
 });
 
@@ -184,7 +184,7 @@ app.post("/urls/:shortURL/sub", (req, res) => {
     return res.send(result.error);
   }
    if (req.body.longURL !== "") {
-    urlDatabase[req.params.shortURL] = {longURL: req.body.longURL, userID: req.cookies["user_id"]}
+    urlDatabase[req.params.shortURL] = {longURL: req.body.longURL, userID: req.session.user_id}
   }
   res.redirect("/urls");
 }); 
@@ -196,7 +196,7 @@ app.post("/login", (req, res) => {
   const user = emailLookup(email);
   if (user) {
     if (bcrypt.compareSync(password, hashedPassword)) {
-    res.cookie('user_id', user.id);
+    req.session.user_id = user.id;
     res.redirect("/urls");
     } else {
       return res.status(403).send("Wrong Email or Password");
@@ -207,7 +207,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('user_id')
+  req.session.user_id = null;
   res.redirect("/login");
 });
 
@@ -229,7 +229,7 @@ app.post("/register", (req, res) => {
     email: email,
     password: hashedPassword 
   }
-  res.cookie('user_id', userId);
+  req.session.user_id = userId;
   res.redirect("/urls")
 });
 
