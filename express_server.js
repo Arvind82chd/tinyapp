@@ -5,21 +5,18 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const morgan = require('morgan');
 const bcrypt = require('bcryptjs');
+const cookieSession = require('cookie-session')
 
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2']
+}))
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs") 
 app.set(morgan('dev'));
 
-function generateRandomString() { 
-  let randomString = '1234567890abcdefghijklmnopqrstuvwxyz'; //learn't a new way from a mentor.
-  let shortString = '';
-  for (let i = 0; i < 6; i++) { 
-   shortString += randomString.charAt(Math.floor(Math.random() * randomString.length))
-  }
-  return shortString;
-}
-
+//URL database
 const urlDatabase = {
   b6UTxQ: {
       longURL: "https://www.tsn.ca",
@@ -35,6 +32,7 @@ const urlDatabase = {
 }
 };
 
+//User database
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
@@ -53,6 +51,7 @@ const users = {
   }
 }
 
+//function for finding the urls out of url database
 const urlsForUser = function(id, obj) {
   const tempObj = {};
   for (let i in obj) {
@@ -63,9 +62,9 @@ const urlsForUser = function(id, obj) {
   return tempObj
 }
 
- const emailLookup = function(email) {
+//function to check email out of the user database
+const emailLookup = function(email) {
   for (let userId in users) {
-    console.log(users[userId]);
     if (email === users[userId].email){
       return users[userId];
     }
@@ -73,13 +72,33 @@ const urlsForUser = function(id, obj) {
   return false;
 }
 
+// function to generate random string - new way to genrate by a mentor
+function generateRandomString() { 
+  let randomString = '1234567890abcdefghijklmnopqrstuvwxyz'; 
+  let shortString = '';
+  for (let i = 0; i < 6; i++) { 
+   shortString += randomString.charAt(Math.floor(Math.random() * randomString.length))
+  }
+  return shortString;
+}
 
+//function to check for permissions - helped by a mentor
+function checkPermission(req) {
+  let userId = req.cookies["user_id"];
+  let urlId = req.params.shortURL;
+  if (!urlDatabase[urlId]) {
+    return {data: null, error: 'URL does not exist.' }
+  } else if (urlDatabase[urlId]['userID'] !== userId) {
+    return {data: null, error: 'you do not have permission.' }
+  } 
+  return {data: urlId , error: null}
+}
+
+//ALL GETs:
 app.get("/urls", (req, res) => {
   const idKey = req.cookies["user_id"];
   const user = users[idKey];
-  console.log(user);
   const result = urlsForUser(idKey, urlDatabase);
-  console.log(result);
   const templateVars = { urls: result,
     user};
   if (!user) {
@@ -92,16 +111,16 @@ app.get("/urls", (req, res) => {
   }
 });
 
+
 app.get("/urls/new", (req, res) => {
   const user = users[req.cookies["user_id"]]
   const templateVars = {
     user_id: req.cookies["user_id"],
     user
   };
-  console.log(templateVars);
   if (!user) {
-  return res.send("You need to login first.")
-  //return res.redirect("/login");
+    return res.send("You need to login first.")
+    //return res.redirect("/login");
   } 
   if (!user['id']) {
     return res.send("You need to login first.")
@@ -111,13 +130,13 @@ app.get("/urls/new", (req, res) => {
   
 });
 
+//equivalent to urls/:id on compass
 app.get("/urls/:shortURL", (req, res) => {
   const idKey = req.cookies["user_id"];
   const user = users[idKey]
   const shortURL = req.params.shortURL;
   const result = urlsForUser(idKey, urlDatabase);
   const longURL = result[shortURL];
-  console.log(longURL); 
   const templateVars = { shortURL: shortURL, longURL: longURL, user};
   if (!user) {
     return res.send("You need to login first, to access the page.")
@@ -130,11 +149,6 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL]
-  res.redirect(longURL);
-});
-
 app.get("/register", (req, res) => {
   const templateVars = {user:null}; 
   res.render("register", templateVars);
@@ -145,54 +159,43 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 })
 
+
+//ALL POSTS
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = {longURL: req.body.longURL, userID: req.cookies["user_id"]};
   res.redirect(`/urls/${shortURL}`)        
 });
 
+//for deleting the url entries
 app.post("/urls/:shortURL/delete", (req, res) => {
   let result = checkPermission(req)
   if (result.error) {
     return res.send(result.error);
   }
-  console.log('test2', result);
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
 
+//for editing the urls
 app.post("/urls/:shortURL/sub", (req, res) => {
   let result = checkPermission(req)
   if (result.error) {
     return res.send(result.error);
   }
-  console.log('test1', result);
    if (req.body.longURL !== "") {
     urlDatabase[req.params.shortURL] = {longURL: req.body.longURL, userID: req.cookies["user_id"]}
   }
   res.redirect("/urls");
 }); 
 
-function checkPermission(req) {
-  let userId = req.cookies["user_id"];
-  let urlId = req.params.shortURL;
-  if (!urlDatabase[urlId]) {
-    return {data: null, error: 'URL does not exist.' }
-  } else if (urlDatabase[urlId]['userID'] !== userId) {
-    return {data: null, error: 'you do not have permission.' }
-  } 
-  return {data: urlId , error: null}
-}
-
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10); 
   const user = emailLookup(email);
-  console.log('test1', user);
   if (user) {
     if (bcrypt.compareSync(password, hashedPassword)) {
-    console.log('test2', user.id);
     res.cookie('user_id', user.id);
     res.redirect("/urls");
     } else {
@@ -226,7 +229,6 @@ app.post("/register", (req, res) => {
     email: email,
     password: hashedPassword 
   }
-  console.log(users);
   res.cookie('user_id', userId);
   res.redirect("/urls")
 });
